@@ -81,14 +81,16 @@
 - [Reflection](#reflection)
 
 ## Project Overview
-This project focuses on system administration using Docker to create a small infrastructure with multiple services. The goal is to set up NGINX, WordPress, and MariaDB containers with proper networking, volumes, and security configurations.
+This project focuses on system administration and infrastructure setup using Docker. The core goal is to virtualize a multi-service web environment, specifically a LEMP stack (Linux, Engine X/Nginx, MariaDB, PHP-FPM) to host a WordPress site. It's a deep dive into container orchestration, networking, data persistence, and foundational security.
 
 ## Learning Objectives
+  * > Master Docker & Docker Compose: Understand containerization, image creation with Dockerfile (using Debian as the base OS), and multi-container application management with docker-compose.
 *I'll fill this section with my personal objectives as I progress through the project.*
 
 ## Docker Fundamentals
 
 ### What is Docker?
+  Docker is a tool that allows you to package an application and all its dependencies into a single, isolated unit called a container.
 *My understanding of Docker's purpose, benefits, and use cases.*
 
 ### Containers vs Virtual Machines
