@@ -1,0 +1,64 @@
+
+services:
+  nginx:
+    container_name: nginx
+    build:
+      context: ./requirements/nginx
+      dockerfile: Dockerfile
+    image: ngix_image:v1
+    networks:
+      inception:
+    ports:
+      - "0.0.0.0:443:443"
+    volumes: 
+        - WordPress_volume:/var/www/http:rw
+
+    depends_on:
+      wordpress:
+        condition: service_started
+    restart: unless-stopped
+
+
+  wordpress:
+      container_name: wp-php
+      build:
+        context: ./requirements/wordpress
+        dockerfile: Dockerfile
+      image: wordpress_image:v1
+      networks:
+        inception:
+      ports:
+        - ":9000"
+      volumes: 
+        - WordPress_volume:/var/www/html
+      depends_on:
+        mariadb:
+          condition: service_healthy
+      restart: unless-stopped
+
+  mariadb:
+    container_name: mariadb
+    build: 
+      context: ./requirements/mariadb
+      dockerfile: Dockerfile
+    image: mariadb_image:v1
+    networks:
+      inception:
+    ports:
+      - ":3306"
+    volumes:
+      - DB_volume:/var/lib/mysql
+    restart: unless-stopped
+
+volumes:
+# - bind: volume TODO
+  DB_volume:
+    name: mariadb_volume
+
+  WordPress_volume:
+    name: wordpress_volume
+
+
+networks:
+  inception:
+    name: inception_network
