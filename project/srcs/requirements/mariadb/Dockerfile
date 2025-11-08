@@ -21,6 +21,6 @@ RUN mkdir /run/mysqld && chmod +x /usr/local/bin/setup.sh
 
 
 # ENTRYPOINT [ "executable" ]
-CMD [ "setup.sh" ]
+# CMD [ "setup.sh" ]
 
-# CMD [ "sleep", "infinity" ]
+CMD [ "sleep", "infinity" ]
