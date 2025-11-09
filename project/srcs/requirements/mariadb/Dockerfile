@@ -14,7 +14,9 @@ RUN sed  -i "s/= 127.0.0.1/= 0.0.0.0/g"  /etc/mysql/mariadb.conf.d/50-server.cnf
 # The copy command is used to copy the file/folders to the image while building the image. 
 COPY ./conf/setup.sh /usr/local/bin/setup.sh
 
-RUN mkdir /run/mysqld && chmod +x /usr/local/bin/setup.sh
+RUN mkdir /run/mysqld && \
+	 chown -R mysql:mysql /run/mysqld && \
+	 chmod +x /usr/local/bin/setup.sh
 
 
 # HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 CMD [ "true" ]
