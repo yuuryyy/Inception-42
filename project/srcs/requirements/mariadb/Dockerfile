@@ -8,6 +8,7 @@ RUN apt-get update && \
     apt-get install -y mariadb-server && \
     rm -rf /var/lib/apt/list/*
 
+RUN rm -rf /var/lib/mysql/*
 
 RUN sed  -i "s/= 127.0.0.1/= 0.0.0.0/g"  /etc/mysql/mariadb.conf.d/50-server.cnf
 
@@ -15,14 +16,14 @@ RUN sed  -i "s/= 127.0.0.1/= 0.0.0.0/g"  /etc/mysql/mariadb.conf.d/50-server.cnf
 COPY ./conf/setup.sh /usr/local/bin/setup.sh
 
 RUN mkdir /run/mysqld && \
-	 chown -R mysql:mysql /run/mysqld && \
-	 chmod +x /usr/local/bin/setup.sh
+	  chown -R mysql:mysql /run/mysqld && \
+	  chmod +x /usr/local/bin/setup.sh \
 
 
 # HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 CMD [ "true" ]
 
 
-# ENTRYPOINT [ "executable" ]
+ ENTRYPOINT [ "setup.sh" ]
 # CMD [ "setup.sh" ]
 
-CMD [ "sleep", "infinity" ]
+#CMD [ "sleep", "infinity" ]

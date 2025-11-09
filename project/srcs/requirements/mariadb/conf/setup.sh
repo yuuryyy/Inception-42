@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Exit immediately if a command exits with a non-zero status.
-sed -e
+set -e
 
 
 # # Define the data directory
@@ -36,7 +36,7 @@ if [ -z "$(find "$DATADIR" -mindepth 1 -print -quit)" ]; then
         #  that MariaDB needs to function. --user=mysql is crucial 
         #  for setting the correct file permissions, as the server will
         #   run as the mysql user.
-    mariadb-install-db --datadir="$DATADIR"
+    mariadb-install-db --user=mysql --datadir="$DATADIR"
 
 	#: Starts a temporary MariaDB server in the background to perform the setup.
 	#mysqld: The MariaDB server program
@@ -47,7 +47,7 @@ if [ -z "$(find "$DATADIR" -mindepth 1 -print -quit)" ]; then
 	#&: The ampersand runs the process in the background. This is critical because 
 	#otherwise, the script would just hang here forever 
 	#waiting for the server to stop.
-    mysqld  --datadir="$DATADIR" --skip-networking &
+    mysqld --user=mysql --datadir="$DATADIR" --skip-networking &
     
      #Saves the Process ID (PID) of the temporary server.
      #$! is a special Bash variable that always contains the 
