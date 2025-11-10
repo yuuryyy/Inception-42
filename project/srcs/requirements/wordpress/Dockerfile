@@ -2,6 +2,17 @@ FROM debian:11-slim
 
 # WORKDIR /the/workdir/path
 
+# ARG WORDPRESS_VERSION=6.4.1
+# ARG PHP_VERSION=8.2
+
+
+# ENV WORDPRESS_PATH=/var/www/html
+
+# ENV DEBIAN_FRONTEND=noninteractive
+
+
+
+
 # RUN apt-get update && apt-get install -y php-fpm \
 #     php-cli \
 #     php-mysqli\
@@ -14,9 +25,6 @@ FROM debian:11-slim
 
 # RUN chmod +x /usr/local/bin/setup.sh
 
-
-
-HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 CMD [ "true" ]
 
 EXPOSE 9000
 
