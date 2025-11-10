@@ -58,9 +58,9 @@ COPY ./conf/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 
-# ENTRYPOINT [ "entrypoint.sh" ]
+ENTRYPOINT [ "entrypoint.sh" ]
 
 EXPOSE 9000
 
-CMD [ "sleep", "infinity" ]
+# CMD [ "sleep", "infinity" ]
 
