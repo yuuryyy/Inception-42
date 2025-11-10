@@ -36,6 +36,8 @@ services:
           condition: service_healthy
       restart: unless-stopped
 
+
+
   mariadb:
     container_name: mariadb
     build: 
@@ -53,6 +55,14 @@ services:
       MARIADB_DATABASE: ${DB_DATABASE}
       MARIADB_USER: ${DB_USER}
       MARIADB_PASSWORD: ${DB_PASSWORD}
+    healthcheck:
+      # The command Docker will run inside the container to check its health.
+      test: ["CMD", "mariadb-admin", "ping", "--silent", "-p${DB_ROOT_PASSWORD}"]
+      interval: 10s       # How often to run the check.
+      timeout: 5s         # How long to wait for the check to return.
+      retries: 3          # How many consecutive failures to allow before marking as unhealthy.
+      start_period: 30s  #wait after starting container
+
     restart: unless-stopped
 
 volumes:
