@@ -30,7 +30,7 @@ RUN wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.ph
     chmod +x wp-cli.phar && \
     mv wp-cli.phar /usr/local/bin/wp-cli
 
-RUN sed "s#listen = /run/php/php/php7.4-fpm.sock#listen = 0.0.0.0:9000#"  /etc/php/${PHP_VERSION}/fpm/pool.d/www.conf
+RUN sed -i "s#listen = /run/php/php/php7.4-fpm.sock#listen = 0.0.0.0:9000#"  /etc/php/${PHP_VERSION}/fpm/pool.d/www.conf
 
 RUN mkdir -p ${WORDPRESS_PATH}
 
@@ -45,12 +45,6 @@ RUN wget https://wordpress.org/wordpress-${WORDPRESS_VERSION}.zip -O /tmp/wordpr
 
 
 
-# RUN apt-get update && apt-get install -y php-fpm \
-#     php-cli \
-#     php-mysqli\
-#     curl\
-#     && rm -rf /var/lib/apt/lists/* \
-#     && mkdir -p /run/php
 
 # COPY ./conf/www.conf /etc/php/7.4/fpm/pool.d/.
 COPY ./conf/entrypoint.sh /usr/local/bin/entrypoint.sh
