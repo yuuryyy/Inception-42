@@ -60,6 +60,7 @@ RUN chmod +x /usr/local/bin/entrypoint.sh
 
 # ENTRYPOINT [ "entrypoint.sh" ]
 
+EXPOSE 9000
+
 CMD [ "sleep", "infinity" ]
 
-EXPOSE 9000
