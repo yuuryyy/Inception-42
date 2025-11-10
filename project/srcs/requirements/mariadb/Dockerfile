@@ -17,7 +17,7 @@ COPY ./conf/setup.sh /usr/local/bin/setup.sh
 
 RUN mkdir /run/mysqld && \
 	  chown -R mysql:mysql /run/mysqld && \
-	  chmod +x /usr/local/bin/setup.sh \
+	  chmod +x /usr/local/bin/setup.sh
 
 
 # HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 CMD [ "true" ]
