@@ -23,7 +23,7 @@ RUN mkdir /run/mysqld && \
 # HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 CMD [ "true" ]
 
 
- ENTRYPOINT [ "setup.sh" ]
+ ENTRYPOINT [ "/usr/local/bin/setup.sh" ]
 # CMD [ "setup.sh" ]
 
 #CMD [ "sleep", "infinity" ]

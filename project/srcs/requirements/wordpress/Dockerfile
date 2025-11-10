@@ -30,7 +30,7 @@ RUN wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.ph
     chmod +x wp-cli.phar && \
     mv wp-cli.phar /usr/local/bin/wp-cli
 
-RUN sed -i "s#listen = /run/php/php/php7.4-fpm.sock#listen = 0.0.0.0:9000#"  /etc/php/${PHP_VERSION}/fpm/pool.d/www.conf
+RUN sed -i "s#listen = /run/php/php7.4-fpm.sock#listen = 0.0.0.0:9000#"  /etc/php/${PHP_VERSION}/fpm/pool.d/www.conf
 
 RUN mkdir -p ${WORDPRESS_PATH}
 
@@ -52,7 +52,7 @@ COPY ./conf/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 
-ENTRYPOINT [ "entrypoint.sh" ]
+ENTRYPOINT [ "/usr/local/bin/entrypoint.sh" ]
 
 EXPOSE 9000
 
