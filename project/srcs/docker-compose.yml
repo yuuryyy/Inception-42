@@ -27,8 +27,8 @@ services:
       image: wordpress_image:v1
       networks:
         inception:
-      ports:
-        - ":9000"
+      # ports:
+      #   - ":9000"
       volumes: 
         - WordPress_volume:/var/www/html
       depends_on:
