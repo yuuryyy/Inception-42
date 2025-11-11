@@ -2,6 +2,8 @@ FROM debian:11-slim
 
 # WORKDIR /the/workdir/path
 
+ARG DOMAIN_NAME
+
 RUN apt-get update && apt-get install -y nginx openssl  gettext-base && \
     rm -rf /var/lib/apt/lists/*
 
