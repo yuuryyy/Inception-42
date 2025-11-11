@@ -2,7 +2,7 @@ FROM debian:11-slim
 
 # WORKDIR /the/workdir/path
 
-RUN apt-get update && apt-get install -y nginx openssl && \
+RUN apt-get update && apt-get install -y nginx openssl  gettext-base && \
     rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /etc/nginx/ssl
