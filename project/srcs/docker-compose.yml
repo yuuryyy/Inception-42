@@ -1,58 +1,54 @@
+version: '3.8'
 
 services:
-  # nginx:
-  #   container_name: nginx
-  #   build:
-  #     context: ./requirements/nginx
-  #     dockerfile: Dockerfile
-  #   image: ngix_image:v1
-  #   networks:
-  #     inception:
-  #   ports:
-  #     - "443:443"
-  #   volumes: 
-  #       - WordPress_volume:/var/www/http:rw
-
-  #   depends_on:
-  #     wordpress:
-  #       condition: service_started
-  #   restart: unless-stopped
-
+  nginx:
+    build:
+      context: ./requirements/nginx
+      dockerfile: Dockerfile
+      args:
+        DOMAIN_NAME: ${DOMAIN_NAME}
+    image: nginx-image:v1
+    container_name: nginx
+    networks:
+      - inception
+    ports:
+      - "443:443"
+    volumes: 
+      - WordPress_volume:/var/www/html:ro
+    depends_on:
+      - wordpress
+    restart: unless-stopped
 
   wordpress:
-      container_name: wp-php
-      build:
-        context: ./requirements/wordpress
-        dockerfile: Dockerfile
-      image: wordpress_image:v1
-      networks:
-        inception:
-      # ports:
-      #   - ":9000"
-      volumes: 
-        - WordPress_volume:/var/www/html
-      depends_on:
-        mariadb:
-          condition: service_healthy
-      environment:
-        WORDPRESS_DB_HOST: mariadb
-        WORDPRESS_DB_USER: ${DB_USER}
-        WORDPRESS_DB_PASSWORD: ${DB_PASSWORD}
-        WORDPRESS_DB_NAME: ${DB_DATABASE}
-      restart: unless-stopped
-
-
+    build:
+      context: ./requirements/wordpress
+      dockerfile: Dockerfile
+    image: wordpress-image:v1
+    container_name: wp-php
+    networks:
+      - inception
+    volumes: 
+      - WordPress_volume:/var/www/html
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    environment:
+      WORDPRESS_DB_HOST: mariadb
+      WORDPRESS_DB_USER: ${DB_USER}
+      WORDPRESS_DB_PASSWORD: ${DB_PASSWORD}
+      WORDPRESS_DB_NAME: ${DB_DATABASE}
+    restart: unless-stopped
 
   mariadb:
-    container_name: mariadb
     build: 
       context: ./requirements/mariadb
       dockerfile: Dockerfile
-    image: mariadb_image:v1
+    image: mariadb-image:v1
+    container_name: mariadb
     networks:
-      inception:
+      - inception
     ports:
-      - ":3306"
+      - "3306:3306"
     volumes:
       - DB_volume:/var/lib/mysql
     environment:
@@ -60,25 +56,19 @@ services:
       MARIADB_DATABASE: ${DB_DATABASE}
       MARIADB_USER: ${DB_USER}
       MARIADB_PASSWORD: ${DB_PASSWORD}
-    
     healthcheck:
-      # The command Docker will run inside the container to check its health.
       test: ["CMD", "mariadb-admin", "ping", "--silent", "-p${DB_ROOT_PASSWORD}"]
-      interval: 10s       # How often to run the check.
-      timeout: 5s         # How long to wait for the check to return.
-      retries: 3          # How many consecutive failures to allow before marking as unhealthy.
-      start_period: 30s  #wait after starting container
-
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
     restart: unless-stopped
 
 volumes:
-# - bind: volume TODO
   DB_volume:
     name: mariadb_volume
-
   WordPress_volume:
     name: wordpress_volume
-
 
 networks:
   inception:
