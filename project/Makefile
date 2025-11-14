@@ -76,6 +76,14 @@ it:
 	@echo  "$(BLUE)Opening interactive shell in service '$(service)'...$(RESET)"
 	@$(COMPOSE) exec $(service) /bin/bash
 
+logs:
+	@if [ -z "$(service)" ]; then \
+		echo "$(RED)Error: 'service' is not set. Usage: make logs service=<service_name>$(RESET)"; \
+		exit 1; \
+	fi
+	@echo  "$(BLUE)Opening logs for '$(service)'...$(RESET)"
+	@$(COMPOSE) logs $(service) 
+
 ###########################################################################
 #                         INFORMATION & LISTING RULES
 #          Targets for inspecting the state of the Docker environment.

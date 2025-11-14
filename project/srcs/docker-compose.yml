@@ -33,8 +33,10 @@ services:
     environment:
       WORDPRESS_DB_HOST: mariadb
       WORDPRESS_DB_USER: ${DB_USER}
-      WORDPRESS_DB_PASSWORD: ${DB_PASSWORD}
       WORDPRESS_DB_NAME: ${DB_DATABASE}
+    secrets:
+      - db_password
+      - credentials
     restart: unless-stopped
 
   mariadb:
@@ -50,12 +52,14 @@ services:
     volumes:
       - DB_volume:/var/lib/mysql
     environment:
-      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-      MARIADB_DATABASE: ${DB_DATABASE}
-      MARIADB_USER: ${DB_USER}
-      MARIADB_PASSWORD: ${DB_PASSWORD}
+       MARIADB_DATABASE: ${DB_DATABASE}
+       MARIADB_USER: ${DB_USER}
+    secrets:
+      - db_password
+      - db_root_password
+      - credentials
     healthcheck:
-      test: ["CMD", "mariadb-admin", "ping", "--silent", "-p${DB_ROOT_PASSWORD}"]
+      test: ["CMD", "mariadb-admin", "ping", "--silent", "-p$$(cat /run/secrets/db_root_password)"]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -71,3 +75,13 @@ volumes:
 networks:
   inception:
     name: inception_network
+
+secrets:
+  db_password:
+    file: ../secrets/db_password.txt
+  db_root_password:
+    file: ../secrets/db_root_password.txt
+  credentials:
+    file: ../secrets/credentials.txt
+  
+

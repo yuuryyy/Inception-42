@@ -10,6 +10,7 @@ else
     # This block only runs on the first start.
     echo "Configuring WordPress for the first time..."
 
+    WORDPRESS_DB_PASSWORD=$(cat /run/secrets/db_password)
     # Use wp-cli to create the wp-config.php file from environment variables.
     wp-cli --allow-root config create \
         --dbname="${WORDPRESS_DB_NAME}" \
