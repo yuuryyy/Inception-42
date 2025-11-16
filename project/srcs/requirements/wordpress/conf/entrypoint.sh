@@ -9,6 +9,7 @@ else
 
     # Read the password from the secret file.
     DB_PASSWORD_FROM_SECRET=$(cat /run/secrets/db_password)
+    WORDPRESS_ADMIN_PASSWORD=$(cat /run/secrets/wp_admin_password)
 
     # Use --allow-root because this script is running as the root user.
     wp-cli --allow-root config create \
