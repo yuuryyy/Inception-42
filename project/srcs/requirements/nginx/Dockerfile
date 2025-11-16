@@ -16,14 +16,21 @@ RUN mkdir -p /etc/nginx/ssl
 #public certificate to /etc/nginx/ssl/nginx.crt. For the certificate's identity, 
 #use the following subject information: Country=MA, State=Khouribga, City=Khouribga,
 # Organization=1337, and critically, the Common Name must be the value of the DOMAIN_NAME variable.""
-RUN openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/ssl/nginx.key -out /etc/nginx/ssl/nginx.crt -subj "/C=MA/ST=Khouribga/L=Khouribga/O=1337/CN=${DOMAIN_NAME}"
+RUN openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/ssl/nginx.key -out\
+     /etc/nginx/ssl/nginx.crt -subj "/C=MA/ST=Khouribga/L=Khouribga/O=1337/CN=${DOMAIN_NAME}"
 
 
-COPY ./conf/nginx.conf /etc/nginx/templates/default.conf.template
+COPY ./nginx/conf/nginx.conf /etc/nginx/templates/default.conf.template
 
 # Use `envsubst` to substitute the variable and create the final config file
 RUN envsubst '$${DOMAIN_NAME}' < /etc/nginx/templates/default.conf.template > /etc/nginx/conf.d/default.conf
 
+# --- THIS IS THE KEY CHANGE ---
+# Create the root directory for the bonus site inside the image.
+RUN mkdir -p /var/www/bonus
+# COPY the source files from your local machine into the image's filesystem.
+# The source path is relative to the build context defined in docker-compose.yml.
+COPY ./bonus/static_ws/srcs/* /var/www/bonus/
 
 EXPOSE 443
 

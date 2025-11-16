@@ -35,8 +35,10 @@ clean:
 	@$(COMPOSE) down
 
 fclean: clean
-	@echo  "$(RED)Performing deep clean: removing images, volumes, and networks...$(RESET)"
-	@$(COMPOSE) down --rmi all --volumes
+	@echo  "$(RED)Performing deep clean: removing all volumes and networks...$(RESET)"
+
+	@docker volume rm $(COMPOSE_PROJECT)_mariadb_data $(COMPOSE_PROJECT)_wordpress_files || true
+# 	@docker network rm $(COMPOSE_PROJECT)_inception || true
 	@echo  "$(GREEN)Project fully cleaned.$(RESET)"
 
 re: fclean all
@@ -48,9 +50,9 @@ re: fclean all
 ###########################################################################
 
 build:
-	@echo  "$(BLUE)Creating host directories for persistent data...$(RESET)"
-	@mkdir -p ~/data/wordpress
-	@mkdir -p ~/data/mariadb
+# 	@echo  "$(BLUE)Creating host directories for persistent data...$(RESET)"
+# 	@mkdir -p ~/data/wordpress
+# 	@mkdir -p ~/data/mariadb
 	@echo  "$(BLUE)Building images and starting services for project '$(COMPOSE_PROJECT)'...$(RESET)"
 	@$(COMPOSE) up --build -d
 	@echo  "$(GREEN)Project is up and running!$(RESET)"
@@ -99,13 +101,14 @@ list_images:
 	@echo  "$(BLUE)--- Images for project '$(COMPOSE_PROJECT)' ---$(RESET)"
 	@$(COMPOSE) images
 
+
 list_volumes:
-	@echo  "$(BLUE)--- Volumes for project '$(COMPOSE_PROJECT)' ---$(RESET)"
-	@docker volume ls --filter "label=com.docker.compose.project=$(COMPOSE_PROJECT)"
+	@echo  "$(BLUE)--- Volumes for project '$(COMPOSE_PROJECT_NAME)' ---$(RESET)"
+	@docker volume ls --filter "name=$(COMPOSE_PROJECT_NAME)"
 
 list_networks:
-	@echo  "$(BLUE)--- Networks for project '$(COMPOSE_PROJECT)' ---$(RESET)"
-	@docker network ls --filter "label=com.docker.compose.project=$(COMPOSE_PROJECT)"
+	@echo  "$(BLUE)--- Networks for project '$(COMPOSE_PROJECT_NAME)' ---$(RESET)"
+	@docker network ls --filter "name=$(COMPOSE_PROJECT_NAME)"
 
 ############################################################################
 #		GITHUB MANAGEMENT

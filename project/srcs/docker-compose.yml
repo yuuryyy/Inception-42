@@ -1,87 +1,150 @@
+
 services:
-  nginx:
-    build:
-      context: ./requirements/nginx
-      dockerfile: Dockerfile
-      args:
-        DOMAIN_NAME: ${DOMAIN_NAME}
-    image: nginx-image:v1
-    container_name: nginx
+  mariadb:
+    build: ./requirements/mariadb
+    container_name: mariadb
+    volumes:
+      - mariadb_data:/var/lib/mysql
     networks:
       - inception
+    environment:
+      MARIADB_DATABASE: ${DB_DATABASE}
+      MARIADB_USER: ${DB_USER}
+    secrets:
+      - db_root_password
+      - db_password
+    healthcheck:
+      test: ["CMD", "sh", "-c", "mariadb-admin ping --silent -p$$(cat /run/secrets/db_root_password)"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  wordpress:
+    build: ./requirements/wordpress
+    container_name: wordpress
+    volumes:
+      - wordpress_files:/var/www/html
+    networks:
+      - inception
+    environment:
+      DOMAIN_NAME: ${DOMAIN_NAME}
+      WORDPRESS_DB_HOST: mariadb
+      WORDPRESS_DB_USER: ${DB_USER}
+      WORDPRESS_DB_NAME: ${DB_DATABASE}
+      WORDPRESS_TITLE: ${WP_TITLE}
+      WORDPRESS_ADMIN_USER: ${WP_ADMIN_USER}
+      WORDPRESS_ADMIN_PASSWORD: ${WP_ADMIN_PASSWORD}
+      WORDPRESS_ADMIN_EMAIL: ${WP_ADMIN_EMAIL}
+    secrets:
+      - db_password
+    depends_on:
+      mariadb:
+        condition: service_healthy
+      redis: # Add a dependency on the Redis service
+        condition: service_started
+    restart: unless-stopped
+
+  nginx:
+    build:
+      context: ./requirements/
+      dockerfile: ./nginx/Dockerfile
+      args:
+        DOMAIN_NAME: ${DOMAIN_NAME}
+    container_name: nginx
     ports:
       - "443:443"
-    volumes: 
-      - WordPress_volume:/var/www/html:ro
+    volumes:
+      - wordpress_files:/var/www/html:ro
+    networks:
+      - inception
     depends_on:
       - wordpress
     restart: unless-stopped
 
-  wordpress:
-    build:
-      context: ./requirements/wordpress
-      dockerfile: Dockerfile
-    image: wordpress-image:v1
-    container_name: wp-php
+  redis:
+    build: ./requirements/bonus/redis
+    container_name: redis
     networks:
       - inception
-    volumes: 
-      - WordPress_volume:/var/www/html
-    depends_on:
-      mariadb:
-        condition: service_healthy
-    environment:
-      WORDPRESS_DB_HOST: mariadb
-      WORDPRESS_DB_USER: ${DB_USER}
-      WORDPRESS_DB_NAME: ${DB_DATABASE}
-    secrets:
-      - db_password
-      - credentials
     restart: unless-stopped
 
-  mariadb:
-    build: 
-      context: ./requirements/mariadb
-      dockerfile: Dockerfile
-    image: mariadb-image:v1
-    container_name: mariadb
+  ftp:
+    build:
+      context: ./requirements/bonus/ftp
+    # Pass the FTP credentials from the .env file to the Dockerfile at build time.
+      args:
+        FTP_USER: ${FTP_USER}
+    environment:
+      FTP_USER: ${FTP_USER}
+    container_name: ftp
+    networks:
+    - inception
+    secrets:
+      - ftp_password
+    ports:
+    - "21:21"
+    - "21100-21110:21100-21110" # Map the passive port range to the host.
+  # THIS IS THE CRITICAL PART.
+  # Mount the SAME named volume that WordPress uses.
+  # This gives the FTP server access to the web files.
+    volumes:
+    - wordpress_files:/var/www/html
+    restart: unless-stopped
+  # docker-compose.yml
+
+  adminer:
+    build: ./requirements/bonus/adminer
+    container_name: adminer
+    # Connect it to the same network so it can find the 'mariadb' service.
+    networks:
+      - inception
+    # Publish its port so you can access it from your browser.
+    # Map host port 8080 to the container's port 8080.
+    ports:
+      - "8080:8080"
+    # Adminer is useless without the database, so it depends on MariaDB.
+    depends_on:
+      - mariadb
+    restart: unless-stopped
+
+    # docker-compose.yml
+
+  # --- NEW NGROK SERVICE ---
+  ngrok:
+    build: ./requirements/bonus/ngrok
+    container_name: ngrok
     networks:
       - inception
     ports:
-      - "3306:3306"
-    volumes:
-      - DB_volume:/var/lib/mysql
-    environment:
-       MARIADB_DATABASE: ${DB_DATABASE}
-       MARIADB_USER: ${DB_USER}
+      # This exposes ngrok's local web inspection interface on port 4040.
+      - "4040:4040"
+    # environment:
+    #   # Pass the authtoken to the container.
+    #   NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN}
+    # # The command to run when the container starts.
+    # # It authenticates and then starts an HTTP tunnel.
+    # # CRITICAL: It points to the 'nginx' service on port 443 over the internal Docker network.
     secrets:
-      - db_password
-      - db_root_password
-      - credentials
-    healthcheck:
-      test: ["CMD", "mariadb-admin", "ping", "--silent", "-p$$(cat /run/secrets/db_root_password)"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-      start_period: 30s
+      - ngrok_authtoken
+    environment:
+      DOMAIN_NAME: ${DOMAIN_NAME}  
+    depends_on:
+      - nginx
     restart: unless-stopped
-
 volumes:
-  DB_volume:
-    name: mariadb_volume
-  WordPress_volume:
-    name: wordpress_volume
+  mariadb_data:
+  wordpress_files:
 
 networks:
   inception:
-    name: inception_network
 
 secrets:
-  db_password:
-    file: ../secrets/db_password.txt
   db_root_password:
     file: ../secrets/db_root_password.txt
-  credentials:
-    file: ../secrets/credentials.txt
-  
-
+  db_password:
+    file: ../secrets/db_password.txt
+  ftp_password:
+    file: ../secrets/ftp_password.txt
+  ngrok_authtoken:
+    file: ../secrets/ngrok_authtoken.txt
