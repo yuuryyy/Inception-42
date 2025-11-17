@@ -23,6 +23,14 @@ else
     # to ensure permissions are correct on the newly created wp-config.php.
     chown -R www-data:www-data /var/www/html
 
+    # These lines make WordPress aware of the reverse proxy.
+    # It tells WordPress to build its URLs dynamically based on the incoming Host header.
+    # The `\$` escapes the dollar sign so the shell doesn't interpret it.
+    # The `--raw` flag tells wp-cli to insert the value as raw PHP code.
+    echo "Making WordPress proxy-aware..."
+    wp-cli --allow-root config set WP_HOME "https://\$_SERVER['HTTP_HOST']" --raw --path="/var/www/html"
+    wp-cli --allow-root config set WP_SITEURL "https://\$_SERVER['HTTP_HOST']" --raw --path="/var/www/html"
+
     # Install WordPress.
     wp-cli --allow-root core install \
         --url="https://${DOMAIN_NAME}" \
