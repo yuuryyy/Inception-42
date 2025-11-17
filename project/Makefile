@@ -111,7 +111,7 @@ list_networks:
 	@docker network ls --filter "name=$(COMPOSE_PROJECT_NAME)"
 
 ############################################################################
-#						odGITHUB MANAGEMENT
+#						GITHUB MANAGEMENT
 #
 ###########################################################################
 push:

@@ -28,8 +28,8 @@ else
     # The `\$` escapes the dollar sign so the shell doesn't interpret it.
     # The `--raw` flag tells wp-cli to insert the value as raw PHP code.
     echo "Making WordPress proxy-aware..."
-    wp-cli --allow-root config set WP_HOME "https://\$_SERVER['HTTP_HOST']" --raw --path="/var/www/html"
-    wp-cli --allow-root config set WP_SITEURL "https://\$_SERVER['HTTP_HOST']" --raw --path="/var/www/html"
+    echo "define('WP_HOME', 'https://' . \$_SERVER['HTTP_HOST']);" >> /var/www/html/wp-config.php
+    echo "define('WP_SITEURL', 'https://' . \$_SERVER['HTTP_HOST']);" >> /var/www/html/wp-config.php
 
     # Install WordPress.
     wp-cli --allow-root core install \
