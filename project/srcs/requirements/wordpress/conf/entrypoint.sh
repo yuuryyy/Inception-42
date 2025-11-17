@@ -27,24 +27,9 @@ else
     # It tells WordPress to build its URLs dynamically based on the incoming Host header.
     # The `\$` escapes the dollar sign so the shell doesn't interpret it.
     # The `--raw` flag tells wp-cli to insert the value as raw PHP code.
-    echo "Making WordPress proxy-aware..."
-    cat << EOF >> /var/www/html/wp-config.php
-
-    #Reverse Proxy SSL Support
-    if (isset(\$_SERVER['HTTP_X_FORWARDED_PROTO']) && \$_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
-        \$_SERVER['HTTPS'] = 'on';
-    }
-
-    if (isset(\$_SERVER['HTTP_HOST'])) {
-        define('WP_HOME', 'https://' . \$_SERVER['HTTP_HOST']);
-        define('WP_SITEURL', 'https://' . \$_SERVER['HTTP_HOST']);
-    }
-    EOF
-
 
     # Install WordPress.
     wp-cli --allow-root core install \
-        --url="https://${DOMAIN_NAME}" \
         --title="${WORDPRESS_TITLE}" \
         --admin_user="${WORDPRESS_ADMIN_USER}" \
         --admin_password="${WORDPRESS_ADMIN_PASSWORD}" \
@@ -54,8 +39,8 @@ else
         # --- NEW BONUS PART: CONFIGURE REDIS ---
     echo "Configuring Redis cache..."
     wp-cli --allow-root plugin install redis-cache --activate --path="/var/www/html"
-    wp-cli --allow-root config set WP_REDIS_HOST redis --path="/var/www/html"
-    wp-cli --allow-root config set WP_REDIS_PORT 6379 --path="/var/www/html"
+    wp-cli --allow-root config set WP_REDIS_HOST ${REDIS_HOST} --path="/var/www/html"
+    wp-cli --allow-root config set WP_REDIS_PORT ${REDIS_PORT} --path="/var/www/html"
     wp-cli --allow-root redis enable --path="/var/www/html"
     # --- END OF BONUS PART ---
 fi

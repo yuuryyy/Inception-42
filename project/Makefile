@@ -50,9 +50,9 @@ re: fclean all
 ###########################################################################
 
 build:
-# 	@echo  "$(BLUE)Creating host directories for persistent data...$(RESET)"
-# 	@mkdir -p ~/data/wordpress
-# 	@mkdir -p ~/data/mariadb
+	@echo  "$(BLUE)Creating host directories for persistent data...$(RESET)"
+	@mkdir -p ~/data/wordpress
+	@mkdir -p ~/data/mariadb
 	@echo  "$(BLUE)Building images and starting services for project '$(COMPOSE_PROJECT)'...$(RESET)"
 	@$(COMPOSE) up --build -d
 	@echo  "$(GREEN)Project is up and running!$(RESET)"

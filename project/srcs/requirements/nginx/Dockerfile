@@ -34,5 +34,4 @@ COPY ./bonus/static_ws/srcs/* /var/www/bonus/
 
 EXPOSE 443
 
-
 CMD [ "nginx", "-g", "daemon off;"]
