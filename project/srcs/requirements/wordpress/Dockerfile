@@ -40,7 +40,8 @@ RUN chown -R www-data:www-data /run/php
 COPY ./conf/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
+EXPOSE 9000
+
 # The container will start and run the entrypoint as root.
 ENTRYPOINT [ "/usr/local/bin/entrypoint.sh" ]
-
-EXPOSE 9000
+CMD [ "php-fpm7.4","-F" ]

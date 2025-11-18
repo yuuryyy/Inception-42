@@ -33,12 +33,12 @@ all: build
 clean:
 	@echo  "$(YELLOW)Stopping and removing containers for project '$(COMPOSE_PROJECT)'...$(RESET)"
 	@$(COMPOSE) down
+	@$(COMPOSE) logs -f
 
 fclean: clean
 	@echo  "$(RED)Performing deep clean: removing all volumes and networks...$(RESET)"
-
-	@docker volume rm $(COMPOSE_PROJECT)_mariadb_data $(COMPOSE_PROJECT)_wordpress_files || true
-# 	@docker network rm $(COMPOSE_PROJECT)_inception || true
+	@docker volume rm mariadb_volume wordpress_volume || true
+	@docker network rm Inception_network || true
 	@echo  "$(GREEN)Project fully cleaned.$(RESET)"
 
 re: fclean all

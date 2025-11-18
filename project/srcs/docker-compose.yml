@@ -110,48 +110,25 @@ services:
       - mariadb
     restart: unless-stopped
 
-    # docker-compose.yml
-
-  # --- NEW NGROK SERVICE ---
-  ngrok:
-    build: ./requirements/bonus/ngrok
-    container_name: ngrok
-    networks:
-      - inception
-    ports:
-      # This exposes ngrok's local web inspection interface on port 4040.
-      - "4040:4040"
-    # environment:
-    #   # Pass the authtoken to the container.
-    #   NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN}
-    # # The command to run when the container starts.
-    # # It authenticates and then starts an HTTP tunnel.
-    # # CRITICAL: It points to the 'nginx' service on port 443 over the internal Docker network.
-    secrets:
-      - ngrok_authtoken
-    environment:
-      DOMAIN_NAME: ${DOMAIN_NAME}  
-    depends_on:
-      - nginx
-    restart: unless-stopped
-  
+  portainer:
+    
 
 volumes:
   mariadb_data:
     name: mariadb_volume 
-    driver: local
-    driver_opts:
-      type: 'none'
-      o: 'bind'
-      device: "/home/${USER}/data/mariadb"
+    # driver: local
+    # driver_opts:
+    #   type: 'none'
+    #   o: 'bind'
+    #   device: "/home/${USER}/data/mariadb"
 
   wordpress_files:
     name: wordpress_volume
-    driver: local
-    driver_opts:
-      type: 'none'
-      o: 'bind'
-      device: "/home/${USER}/data/wordpress"
+    # driver: local
+    # driver_opts:
+    #   type: 'none'
+    #   o: 'bind'
+    #   device: "/home/${USER}/data/wordpress"
 
 
 networks:
@@ -168,5 +145,3 @@ secrets:
     file: ../secrets/wp_admin_password.txt
   ftp_password:
     file: ../secrets/ftp_password.txt
-  ngrok_authtoken:
-    file: ../secrets/ngrok_authtoken.txt

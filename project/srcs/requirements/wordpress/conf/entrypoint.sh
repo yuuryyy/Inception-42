@@ -19,32 +19,27 @@ else
         --dbhost="${WORDPRESS_DB_HOST}" \
         --path="/var/www/html"
 
-    # The files are already owned by www-data, but we run chown again
-    # to ensure permissions are correct on the newly created wp-config.php.
-    chown -R www-data:www-data /var/www/html
-
-    # These lines make WordPress aware of the reverse proxy.
-    # It tells WordPress to build its URLs dynamically based on the incoming Host header.
-    # The `\$` escapes the dollar sign so the shell doesn't interpret it.
-    # The `--raw` flag tells wp-cli to insert the value as raw PHP code.
-
-    # Install WordPress.
+    # STEP 1: Install WordPress using the required placeholder URL.
+    # This will unfortunately hardcode this URL into theme settings, etc.
     wp-cli --allow-root core install \
+        --url="https://${DOMAIN_NAME}" \
         --title="${WORDPRESS_TITLE}" \
         --admin_user="${WORDPRESS_ADMIN_USER}" \
         --admin_password="${WORDPRESS_ADMIN_PASSWORD}" \
         --admin_email="${WORDPRESS_ADMIN_EMAIL}" \
         --path="/var/www/html"
-
-        # --- NEW BONUS PART: CONFIGURE REDIS ---
+    
+    # --- CONFIGURE REDIS ---
     echo "Configuring Redis cache..."
     wp-cli --allow-root plugin install redis-cache --activate --path="/var/www/html"
-    wp-cli --allow-root config set WP_REDIS_HOST ${REDIS_HOST} --path="/var/www/html"
-    wp-cli --allow-root config set WP_REDIS_PORT ${REDIS_PORT} --path="/var/www/html"
+    wp-cli --allow-root config set WP_REDIS_HOST redis --path="/var/www/html"
+    wp-cli --allow-root config set WP_REDIS_PORT 6379 --path="/var/www/html"
     wp-cli --allow-root redis enable --path="/var/www/html"
-    # --- END OF BONUS PART ---
+
+    # Ensure all files have the correct ownership.
+    chown -R www-data:www-data /var/www/html
 fi
 
 # Start the main process. This is started by root, but will spawn workers as www-data.
 echo "Starting PHP-FPM..."
-exec php-fpm7.4 -F
+exec "$@"
