@@ -156,7 +156,7 @@ volumes:
 
 networks:
   inception:
-    name: Inception
+    name: Inception_network
 
 
 secrets:
