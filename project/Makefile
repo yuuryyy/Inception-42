@@ -37,7 +37,8 @@ clean:
 
 fclean: clean
 	@echo  "$(RED)Performing deep clean: removing all volumes and networks...$(RESET)"
-	@docker volume rm mariadb_volume wordpress_volume || true
+	@docker volume rm mariadb_volume wordpress_volume portainer_volume|| true
+# 	@rm -rf  ~/data/wordpress  ~/data/mariadb  ~/data/portainer
 	@docker network rm Inception_network || true
 	@echo  "$(GREEN)Project fully cleaned.$(RESET)"
 
@@ -53,6 +54,7 @@ build:
 	@echo  "$(BLUE)Creating host directories for persistent data...$(RESET)"
 	@mkdir -p ~/data/wordpress
 	@mkdir -p ~/data/mariadb
+	@mkdir -p ~/data/portainer
 	@echo  "$(BLUE)Building images and starting services for project '$(COMPOSE_PROJECT)'...$(RESET)"
 	@$(COMPOSE) up --build -d
 	@echo  "$(GREEN)Project is up and running!$(RESET)"

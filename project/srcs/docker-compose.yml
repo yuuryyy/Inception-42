@@ -111,25 +111,42 @@ services:
     restart: unless-stopped
 
   portainer:
-    
+    build: ./requirements/bonus/portainer
+    container_name: portainer
+    ports:
+      - "9443:9443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      # A named volume for Portainer's own configuration data to be persistent.
+      - portainer_data:/data
+    networks:
+      - inception
+    restart: unless-stopped
+
 
 volumes:
   mariadb_data:
     name: mariadb_volume 
-    # driver: local
-    # driver_opts:
-    #   type: 'none'
-    #   o: 'bind'
-    #   device: "/home/${USER}/data/mariadb"
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: "/home/${USER}/data/mariadb"
 
   wordpress_files:
     name: wordpress_volume
-    # driver: local
-    # driver_opts:
-    #   type: 'none'
-    #   o: 'bind'
-    #   device: "/home/${USER}/data/wordpress"
-
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: "/home/${USER}/data/wordpress"
+  portainer_data: 
+    name: portainer_volume
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: "/home/${USER}/data/portainer"
 
 networks:
   inception:
