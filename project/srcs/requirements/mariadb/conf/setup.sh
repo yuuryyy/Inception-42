@@ -30,14 +30,14 @@ DATADIR="/var/lib/mysql"
 if [ -z "$(find "$DATADIR" -mindepth 1 -print -quit)" ]; then
     echo "Data directory is empty. Initializing MariaDB..."
 
-        MARIADB_ROOT_PASSWORD=$(cat /run/secrets/db_root_password)
-        MARIADB_PASSWORD=$(cat /run/secrets/db_password)
-         # 1. Initialize the database data directory
-        # This command creates the fundamental system
-        # tables and databases (like mysql, performance_schema)
-        #  that MariaDB needs to function. --user=mysql is crucial 
-        #  for setting the correct file permissions, as the server will
-        #   run as the mysql user.
+    MARIADB_ROOT_PASSWORD=$(cat /run/secrets/db_root_password)
+    MARIADB_PASSWORD=$(cat /run/secrets/db_password)
+    # 1. Initialize the database data directory
+    # This command creates the fundamental system
+    # tables and databases (like mysql, performance_schema)
+    #  that MariaDB needs to function. --user=mysql is crucial 
+    #  for setting the correct file permissions, as the server will
+    #   run as the mysql user.
     mariadb-install-db --user=mysql --datadir="$DATADIR"
 
 	#: Starts a temporary MariaDB server in the background to perform the setup.

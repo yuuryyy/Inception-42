@@ -30,7 +30,7 @@ RUN envsubst '$${DOMAIN_NAME}' < /etc/nginx/templates/default.conf.template > /e
 RUN mkdir -p /var/www/bonus
 # COPY the source files from your local machine into the image's filesystem.
 # The source path is relative to the build context defined in docker-compose.yml.
-COPY ./bonus/static_ws/srcs/* /var/www/bonus/
+COPY ../bonus/static_ws/* /var/www/bonus/
 
 EXPOSE 443
 

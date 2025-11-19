@@ -1,32 +1,36 @@
 
+secrets:
+  db_root_password:
+    file: ../secrets/db_root_password.txt
+  db_password:
+    file: ../secrets/db_password.txt
+  wp_admin_password:
+    file: ../secrets/wp_admin_password.txt
+  ftp_password:
+    file: ../secrets/ftp_password.txt
+
+
 services:
-  mariadb:
-    build: ./requirements/mariadb
-    container_name: mariadb
+  nginx:
+    build:
+      context: ./requirements/
+      dockerfile: ./nginx/Dockerfile
+      args:
+        DOMAIN_NAME: ${DOMAIN_NAME}
+    container_name: nginx
     volumes:
-      - mariadb_data:/var/lib/mysql
+      - wordpress_data:/var/www/html:ro
     networks:
       - inception
-    environment:
-      MARIADB_DATABASE: ${DB_DATABASE}
-      MARIADB_USER: ${DB_USER}
-    secrets:
-      - db_root_password
-      - db_password
-    healthcheck:
-      test: ["CMD", "sh", "-c", "mariadb-admin ping --silent -p$$(cat /run/secrets/db_root_password)"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    ports:
+      - "443:443"
+    depends_on:
+      - wordpress
     restart: unless-stopped
 
   wordpress:
     build: ./requirements/wordpress
     container_name: wordpress
-    volumes:
-      - wordpress_files:/var/www/html
-    networks:
-      - inception
     environment:
       DOMAIN_NAME: ${DOMAIN_NAME}
       WORDPRESS_DB_HOST: mariadb
@@ -40,33 +44,44 @@ services:
     secrets:
       - db_password
       - wp_admin_password
-    depends_on:
-      mariadb:
-        condition: service_healthy
-      redis: # Add a dependency on the Redis service
-        condition: service_started
-    restart: unless-stopped
-
-  nginx:
-    build:
-      context: ./requirements/
-      dockerfile: ./nginx/Dockerfile
-      args:
-        DOMAIN_NAME: ${DOMAIN_NAME}
-    container_name: nginx
-    ports:
-      - "443:443"
     volumes:
-      - wordpress_files:/var/www/html:ro
+      - wordpress_data:/var/www/html
     networks:
       - inception
     depends_on:
-      - wordpress
+      mariadb:
+        condition: service_healthy
+      redis:
+        condition: service_started
     restart: unless-stopped
+
+  mariadb:
+    build: ./requirements/mariadb
+    container_name: mariadb
+    environment:
+      MARIADB_DATABASE: ${DB_DATABASE}
+      MARIADB_USER: ${DB_USER}
+    secrets:
+      - db_root_password
+      - db_password
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    networks:
+      - inception
+    healthcheck:
+      test: ["CMD", "sh", "-c", "mariadb-admin ping --silent -p$$(cat /run/secrets/db_root_password)"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+#######################################################################################################
 
   redis:
     build: ./requirements/bonus/redis
     container_name: redis
+    volumes:
+      - redis_data:/data
     networks:
       - inception
     restart: unless-stopped
@@ -77,35 +92,31 @@ services:
     # Pass the FTP credentials from the .env file to the Dockerfile at build time.
       args:
         FTP_USER: ${FTP_USER}
+    container_name: ftp
     environment:
       FTP_USER: ${FTP_USER}
-    container_name: ftp
-    networks:
-    - inception
     secrets:
       - ftp_password
+    volumes:
+      - wordpress_data:/var/www/html
+    networks:
+    - inception
     ports:
     - "21:21"
     - "21100-21110:21100-21110" # Map the passive port range to the host.
   # THIS IS THE CRITICAL PART.
   # Mount the SAME named volume that WordPress uses.
   # This gives the FTP server access to the web files.
-    volumes:
-    - wordpress_files:/var/www/html
     restart: unless-stopped
-  # docker-compose.yml
 
   adminer:
     build: ./requirements/bonus/adminer
     container_name: adminer
     # Connect it to the same network so it can find the 'mariadb' service.
-    networks:
-      - inception
     # Publish its port so you can access it from your browser.
     # Map host port 8080 to the container's port 8080.
-    ports:
-      - "8080:8080"
-    # Adminer is useless without the database, so it depends on MariaDB.
+    networks:
+      - inception
     depends_on:
       - mariadb
     restart: unless-stopped
@@ -113,8 +124,6 @@ services:
   portainer:
     build: ./requirements/bonus/portainer
     container_name: portainer
-    ports:
-      - "9443:9443"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       # A named volume for Portainer's own configuration data to be persistent.
@@ -122,6 +131,7 @@ services:
     networks:
       - inception
     restart: unless-stopped
+
 
 
 volumes:
@@ -133,32 +143,23 @@ volumes:
       o: 'bind'
       device: "/home/${USER}/data/mariadb"
 
-  wordpress_files:
+  wordpress_data:
     name: wordpress_volume
     driver: local
     driver_opts:
       type: 'none'
       o: 'bind'
       device: "/home/${USER}/data/wordpress"
+
+  redis_data:
+    name : redis_volume
+
   portainer_data: 
     name: portainer_volume
-    driver: local
-    driver_opts:
-      type: 'none'
-      o: 'bind'
-      device: "/home/${USER}/data/portainer"
+
+
 
 networks:
   inception:
     name: Inception_network
 
-
-secrets:
-  db_root_password:
-    file: ../secrets/db_root_password.txt
-  db_password:
-    file: ../secrets/db_password.txt
-  wp_admin_password:
-    file: ../secrets/wp_admin_password.txt
-  ftp_password:
-    file: ../secrets/ftp_password.txt

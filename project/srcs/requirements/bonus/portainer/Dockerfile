@@ -21,8 +21,6 @@ RUN mkdir -p /data
 
 # Expose the port for the Portainer web UI (HTTPS).
 EXPOSE 9443
-# Expose the port for the optional edge agent (not used here, but good practice).
-EXPOSE 8000
 
 # The command to start the Portainer server.
 # It points to the binary we extracted and tells it where to store its data.

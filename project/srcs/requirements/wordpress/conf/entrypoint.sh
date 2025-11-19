@@ -10,8 +10,9 @@ else
     # Read the password from the secret file.
     DB_PASSWORD_FROM_SECRET=$(cat /run/secrets/db_password)
     WORDPRESS_ADMIN_PASSWORD=$(cat /run/secrets/wp_admin_password)
-
-    # Use --allow-root because this script is running as the root user.
+    
+    wp-cli --allow-root core download --path="/var/www/html"
+    
     wp-cli --allow-root config create \
         --dbname="${WORDPRESS_DB_NAME}" \
         --dbuser="${WORDPRESS_DB_USER}" \
@@ -32,12 +33,16 @@ else
     # --- CONFIGURE REDIS ---
     echo "Configuring Redis cache..."
     wp-cli --allow-root plugin install redis-cache --activate --path="/var/www/html"
-    wp-cli --allow-root config set WP_REDIS_HOST redis --path="/var/www/html"
-    wp-cli --allow-root config set WP_REDIS_PORT 6379 --path="/var/www/html"
+    wp-cli --allow-root config set WP_REDIS_HOST "${REDIS_HOST}" --path="/var/www/html"
+    wp-cli --allow-root config set WP_REDIS_PORT "${REDIS_PORT}" --path="/var/www/html"
     wp-cli --allow-root redis enable --path="/var/www/html"
 
-    # Ensure all files have the correct ownership.
+
+    # --- CRITICAL PERMISSIONS STEP ---
+    # As the root user, we now give ownership of the web files and the PHP runtime
+    # directory to the 'www-data' user. This prepares the workspace for the FPM workers.
     chown -R www-data:www-data /var/www/html
+    chown -R www-data:www-data /run/php
 fi
 
 # Start the main process. This is started by root, but will spawn workers as www-data.
