@@ -2,8 +2,6 @@ FROM debian:11-slim
 
 ARG PHP_VERSION=7.4
 
-ENV DEBIAN_FRONTEND=noninteractive
-
 # Install all necessary packages. We are the 'root' user here.
 RUN apt-get update && \
     apt-get install -y wget php${PHP_VERSION}-fpm php${PHP_VERSION}-cli php${PHP_VERSION}-mysql && \
@@ -16,7 +14,6 @@ RUN wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.ph
     mv wp-cli.phar /usr/local/bin/wp-cli
 
 COPY ./conf/entrypoint.sh /usr/local/bin/entrypoint.sh
-
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 EXPOSE 9000

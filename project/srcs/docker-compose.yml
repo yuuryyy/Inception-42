@@ -125,7 +125,7 @@ services:
     build: ./requirements/bonus/portainer
     container_name: portainer
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock:rw
       # A named volume for Portainer's own configuration data to be persistent.
       - portainer_data:/data
     networks:

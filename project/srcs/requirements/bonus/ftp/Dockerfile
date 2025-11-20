@@ -12,9 +12,7 @@ RUN apt-get update && \
 
 # Create the user's home directory and the user itself, WITHOUT setting a password yet.
 # The user will exist but be unable to log in until the entrypoint script runs.
-RUN mkdir -p /var/www/html && \
-    useradd -m -d /var/www/html ${FTP_USER}
-
+RUN useradd -m -d /var/www/html ${FTP_USER}
 
 RUN mkdir -p /var/run/vsftpd/empty
 

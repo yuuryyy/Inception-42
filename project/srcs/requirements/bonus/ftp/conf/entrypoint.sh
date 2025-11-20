@@ -16,6 +16,8 @@ if [ ! -f "/etc/ftp_user_configured" ]; then
     # Create the flag file to prevent this block from running again.
     touch /etc/ftp_user_configured
 
+    usermod -G www-data ${FTP_USER}
+    chmod -R g+rw /var/www/html
     echo "FTP user configured successfully."
 fi
 
